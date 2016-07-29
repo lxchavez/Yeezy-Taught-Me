@@ -1,8 +1,9 @@
-Yeezy-Taught-Me
-==============================
+# Yeezy-Taught-Me
 
-Project Organization
-------------
+## Create datasets
+`make data`
+
+## Project Organization
 
     ├── LICENSE
     ├── Makefile           <- Makefile with commands like `make data` or `make train`
