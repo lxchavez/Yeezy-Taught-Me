@@ -69,6 +69,6 @@ target/
 # IPython NB Checkpoints
 .ipynb_checkpoints/
 
-# exclude data from source control by default
-# /data/
+# exclude (raw) data from source control by default
+/data/raw
 
