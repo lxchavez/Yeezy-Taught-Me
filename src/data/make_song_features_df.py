@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import os
-import click
 import logging
 import numpy as np
 import pandas as pd
@@ -38,6 +37,8 @@ if path not in sys.path:
     sys.path.append(path)
 import hdf5_getters as GETTERS
 
+songs_with_features = list()
+
 def execute_query(db_name, query):
     ### Returns a DataFrame containing the query results
     # Read sqlite query results into a pandas DataFrame
@@ -65,37 +66,33 @@ def get_compare_songs_df(all_artists_terms_df):
     return songs_df.loc[mask].copy(deep=True)
 
 def find_valid_file(basedir, track_id, callback=lambda x: x, ext='.h5'):
-    songs_with_features = list()
     for root, dirs, files in os.walk(basedir):
         for file in files:
             if file.endswith(ext) and track_id in file:
-                features_dict = callback(os.path.join(root, file))
-                songs_with_features.append(features_dict)
+                callback(os.path.join(root, file))
     
-    song_features_df = pd.DataFrame(songs_with_features)
-    song_features_df.to_pickle(os.path.join(OUTPUT_PATH, 'song_features_df.pkl'))
-
 def get_features(filename):
-    song_dict = dict()
-    
     # Open the file
     h5 = GETTERS.open_h5_file_read(filename)
             
     # Create a dictionary entry and add it to our song list
     getter_props = (name for name in dir(GETTERS) if name.startswith('get_'))
+    song_dict = dict()
     for prop in getter_props:
         key = prop.replace('get_', '')
         value = getattr(GETTERS, prop)(h5)
         song_dict[key] = value
+    songs_with_features.append(song_dict)
                                                                 
     # Close the file!
     h5.close()
 
     return song_dict
 
-#@click.command()
-#@click.argument('input_filepath', type=click.Path(exists=True))
-#@click.argument('output_filepath', type=click.Path())
+def export_dataset(filename):
+    song_features_df = pd.DataFrame(songs_with_features)
+    song_features_df.to_pickle(os.path.join(OUTPUT_PATH, filename))
+
 def main():
     logger = logging.getLogger(__name__)
     logger.info('Making songs_features_df data set from raw data')
@@ -110,6 +107,8 @@ def main():
     compare_songs_df = get_compare_songs_df(all_artists_terms_df)
     compare_songs_df['track_id'].apply(
         lambda x: find_valid_file(msd_subset_data_path, x, callback=get_features))
+
+    export_dataset('song_features_df.pkl')
 
     logger.info('Done!')
 
