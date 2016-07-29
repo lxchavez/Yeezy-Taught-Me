@@ -13,8 +13,8 @@ BUCKET = [OPTIONAL] your-bucket-for-syncing-data (do not include 's3://')
 requirements:
 	pip install -q -r requirements.txt
 
-data: requirements
-	python src/data/make_dataset.py
+data:
+	python src/data/make_song_features_df.py
 
 clean:
 	find . -name "*.pyc" -exec rm {} \;
