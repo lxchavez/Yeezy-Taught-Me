@@ -4,6 +4,8 @@
 
 ### System libraries
 
+The below instructions were performed in a fresh Amazon EC2 AMI (Linux) instance. YMMV.
+
 #### HD5F client binary (Linux)
 
 **Download and copy the compiled headers and files:**
