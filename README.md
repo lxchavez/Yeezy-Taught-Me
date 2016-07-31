@@ -1,5 +1,53 @@
 # Yeezy-Taught-Me
 
+## Required dependencies
+
+### System libraries
+
+#### HD5F client binary (Linux)
+
+**Download and copy the compiled headers and files:**
+
+    wget http://www.hdfgroup.org/ftp/HDF5/current/bin/linux-x86_64/hdf5-1.8.12-linux-x86_64-shared.tar.gz
+    tar xvfz hdf5-1.8.12-linux-x86_64-shared.tar.gz
+    cd hdf5-1.8.12-linux-x86_64-shared
+    cd bin
+    sudo cp * /usr/bin
+    cd ..
+    cd lib
+    sudo cp * /usr/lib
+    cd ..
+    cd include
+    sudo cp * /usr/include
+    cd ..
+    cd share
+    sudo cp -a * /usr/share
+    cd /usr/lib
+
+**Edit ~/.bashrc:**
+
+    export LD_LIBRARY_PATH="/usr/lib/"
+
+**Source .bashrc:**
+
+    . ~/.bashrc
+
+### Python libraries
+
+- Of course: pandas, numpy, maplotlib, seaborn, etc.
+- h5py
+- tables
+- plotly
+
+### The Million Song Susbet
+
+Download and uncompress the tar ball:
+
+- `wget http://static.echonest.com/millionsongsubset_full.tar.gz`
+- `mkdir assets`
+- `mkdir data`
+- `tar -xf millionsongsubset_full.tar.gz -C assets/data/`
+
 ## Create datasets
 `make data`
 
