@@ -52,6 +52,10 @@
 
 The below instructions were performed in a fresh Amazon EC2 AMI (Linux) instance. YMMV.
 
+#### This will make your life easier
+    sudo yum install -y python-devel
+    sudo yum install -y gcc libxml2 libxml2-devel libxslt libxslt-devel python-devel
+
 #### HD5F client binary (Linux)
 
 **Download and copy the compiled headers and files:**
