@@ -1,66 +1,84 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import ConfigParser
 import os
-import logging
-import numpy as np
-import pandas as pd
 import sys
-import time
-import glob
-import datetime
-import sqlite3
-from dotenv import find_dotenv, load_dotenv
 
-# User defined variables
-# To-Do: refactor to config file
+# Load the configuration file
 #################################
-BASE_PATH               = '/home/ec2-user/notebook/projects/Yeezy-Taught-Me/'
-KANYE_WEST_ARTIST_ID    = 'ARRH63Y1187FB47783'
-ARTIST_SIMILARITY_DB    = 'subset_artist_similarity.db'
-ARTIST_TERM_DB          = 'subset_artist_term.db'
-TRACK_METADATA_DB       = 'subset_track_metadata.db'
 
-## Define files
-################
-# Our output path for the data set
-OUTPUT_PATH             = '/home/ec2-user/notebook/projects/Yeezy-Taught-Me/data/interim/'
+config = ConfigParser.ConfigParser()
+project_config_dir = os.path.join(os.getcwd(), 'src/data/project_config.ini')
+config.read(project_config_dir)
+
+# Read in project config variables
+###################################
+
+ARTIST_SIMILARITY_DB    = config.get('project', 'artist_similarity_db')
+ARTIST_TERM_DB          = config.get('project', 'artist_term_db')
+TRACK_METADATA_DB       = config.get('project', 'track_metadata_db')
+TARGET_ARTIST_ID        = config.get('artist', 'target_artist_id')
+OUTPUT_PATH             = config.get('output', 'interim')
+
+## Define MSD code and data file paths
+#######################################
+
 # path to the Million Song Dataset subset (uncompressed)
-msd_subset_path         = os.path.join(BASE_PATH, 'data/raw/MillionSongSubset')
+msd_subset_path         = os.path.join(os.getcwd(), 'data/raw/MillionSongSubset')
 # path to the Million Song Helper Code
-msd_code_path           = os.path.join(BASE_PATH, 'src/MSongsDB')
+msd_code_path           = os.path.join(os.getcwd(), 'src/MSongsDB')
 # path to the MSD files
 msd_subset_data_path    = os.path.join(msd_subset_path, 'data')
 msd_subset_addf_path    = os.path.join(msd_subset_path, 'AdditionalFiles')
 
-# imports specific to the MSD
-path = os.path.join(msd_code_path, 'PythonSrc')
-if path not in sys.path:
-    sys.path.append(path)
+# Add src directory to our path
+################################
+
+src_dir = os.path.join(os.getcwd(), 'src')
+msd_src_dir = os.path.join(msd_code_path, 'PythonSrc')
+if src_dir not in sys.path:
+    sys.path.append(src_dir)
+if msd_src_dir not in sys.path:
+    sys.path.append(msd_src_dir)
+
+## Library and src imports
+###########################
+
+import datetime
+import glob
 import hdf5_getters as GETTERS
+import logging
+import numpy as np
+import pandas as pd
+import sqlite3
+import time
+import Util
+from dotenv import find_dotenv, load_dotenv
 
 songs_with_features = list()
 
-def execute_query(db_name, query):
-    ### Returns a DataFrame containing the query results
-    # Read sqlite query results into a pandas DataFrame
-    con = sqlite3.connect(os.path.join(msd_subset_addf_path, db_name))
-    df = pd.read_sql_query(query, con)
-    con.close()
-    return df
+def export_dataset(df, filename):
+    df.to_pickle(os.path.join(OUTPUT_PATH, filename))
 
-def get_kanye_terms():
-    query = "SELECT DISTINCT term FROM artist_term WHERE artist_id = '{0}'".format(KANYE_WEST_ARTIST_ID)
-    df = execute_query(ARTIST_TERM_DB, query)
+def get_target_artist_terms():
+    query = "SELECT DISTINCT term FROM artist_term WHERE artist_id = '{0}'".format(TARGET_ARTIST_ID)
+    df = Util.execute_query(msd_subset_addf_path, ARTIST_TERM_DB, query)
     return set(df['term'])
 
-def get_all_artist_terms(kanye_terms):
+def get_all_artist_terms(target_artist_terms):
     query = "SELECT * FROM artist_term"
-    all_artists_terms_df = execute_query(ARTIST_TERM_DB, query)
-    mask = all_artists_terms_df['term'].isin(kanye_terms)
+    all_artists_terms_df = Util.execute_query(msd_subset_addf_path, ARTIST_TERM_DB, query)
+    mask = all_artists_terms_df['term'].isin(target_artist_terms)
     return all_artists_terms_df.loc[mask]
+
+def get_all_songs_df():
+    query = "SELECT * FROM songs"
+    songs_df = Util.execute_query(msd_subset_addf_path, TRACK_METADATA_DB, query)
+    return songs_df
 
 def get_compare_songs_df(all_artists_terms_df):
     query = "SELECT * FROM songs"
-    songs_df = execute_query(TRACK_METADATA_DB, query)
+    songs_df = Util.execute_query(msd_subset_addf_path, TRACK_METADATA_DB, query)
     same_terms_artists_set = set(all_artists_terms_df['artist_id'])
     mask = songs_df['artist_id'].isin(same_terms_artists_set)
     return songs_df.loc[mask].copy(deep=True)
@@ -70,11 +88,11 @@ def find_valid_file(basedir, track_id, callback=lambda x: x, ext='.h5'):
         for file in files:
             if file.endswith(ext) and track_id in file:
                 callback(os.path.join(root, file))
-    
+
 def get_features(filename):
     # Open the file
     h5 = GETTERS.open_h5_file_read(filename)
-            
+
     # Create a dictionary entry and add it to our song list
     getter_props = (name for name in dir(GETTERS) if name.startswith('get_'))
     song_dict = dict()
@@ -83,32 +101,41 @@ def get_features(filename):
         value = getattr(GETTERS, prop)(h5)
         song_dict[key] = value
     songs_with_features.append(song_dict)
-                                                                
+
     # Close the file!
     h5.close()
 
     return song_dict
 
-def export_dataset(filename):
-    song_features_df = pd.DataFrame(songs_with_features)
-    song_features_df.to_pickle(os.path.join(OUTPUT_PATH, filename))
+def get_lyrics(artist_name, song_title):
+    song = Util.Song(artist=artist_name, title=song_title)
+    lyrics = song.lyricwikia()
+    return lyrics
 
 def main():
     logger = logging.getLogger(__name__)
     logger.info('Making songs_features_df data set from raw data')
-    
-    # Grab Kanye terms
-    kanye_terms = get_kanye_terms()
+
+    # Grab terms for the artist ID set in the config file
+    target_artist_terms = get_target_artist_terms()
 
     # Grab terms for all the other artists
-    all_artists_terms_df = get_all_artist_terms(kanye_terms)
+    all_artists_terms_df = get_all_artist_terms(target_artist_terms)
 
-    # Get all songs from the artist_id's we know that share terms with Kanye
+    # Get all songs from the artist_id's we know that share terms with our artist
     compare_songs_df = get_compare_songs_df(all_artists_terms_df)
-    compare_songs_df['track_id'].apply(
+    compare_songs_df = compare_songs_df['track_id'].apply(
         lambda x: find_valid_file(msd_subset_data_path, x, callback=get_features))
 
-    export_dataset('song_features_df.pkl')
+    # Convert list to DataFrame
+    song_features_df = pd.DataFrame(songs_with_features)
+
+    # Get song lyrics
+    song_features_df['lyrics'] = song_features_df.apply(
+        lambda row: get_lyrics(row['artist_name'], row['title']), axis=1)
+
+    # Export our DataFrame
+    export_dataset(song_features_df, 'msd_subset_song_features_df.pkl')
 
     logger.info('Done!')
 

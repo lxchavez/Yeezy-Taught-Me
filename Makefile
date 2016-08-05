@@ -15,7 +15,6 @@ requirements:
 
 data:
 	python src/data/make_song_features_df.py
-	pyrhon src/data/fetch_song_lyrics.py
 clean:
 	find . -name "*.pyc" -exec rm {} \;
 
