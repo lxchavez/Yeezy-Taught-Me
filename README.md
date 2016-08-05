@@ -86,10 +86,7 @@ The below instructions were performed in a fresh Amazon EC2 AMI (Linux) instance
 
 ### Python libraries
 
-- Of course: pandas, numpy, maplotlib, seaborn, etc.
-- h5py
-- tables
-- plotly
+Install all dependencies using `sudo pip install -r requirements.txt` 
 
 ### The Million Song Susbet
 
@@ -101,4 +98,9 @@ Download and uncompress the tar ball:
 - `tar -xf millionsongsubset_full.tar.gz -C assets/data/`
 
 ## Create datasets
-`make data`
+
+Create the Million Song Dataset:
+
+    make data_subset
+
+This will combine song metadata, audio features read from H5 files, and any lyrics found on Lyrics Wikia into one serialized DataFrame for a target artist ID set in **src/data/make_song_features_df.py**.
