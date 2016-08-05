@@ -58,29 +58,21 @@ The below instructions were performed in a fresh Amazon EC2 AMI (Linux) instance
 
 #### HD5F client binary (Linux)
 
-**Download and copy the compiled headers and files:**
+Download and copy the compiled headers and files:
 
     wget http://www.hdfgroup.org/ftp/HDF5/current/bin/linux-x86_64/hdf5-1.8.12-linux-x86_64-shared.tar.gz
     tar xvfz hdf5-1.8.12-linux-x86_64-shared.tar.gz
     cd hdf5-1.8.12-linux-x86_64-shared
-    cd bin
-    sudo cp * /usr/bin
-    cd ..
-    cd lib
-    sudo cp * /usr/lib
-    cd ..
-    cd include
-    sudo cp * /usr/include
-    cd ..
-    cd share
-    sudo cp -a * /usr/share
+    sudo cp -a bin/* /usr/bin
+    sudo cp -a include/* /usr/include
+    sudo cp -a share/* /usr/share
     cd /usr/lib
 
-**Edit ~/.bashrc:**
+Edit ~/.bashrc:
 
     export LD_LIBRARY_PATH="/usr/lib/"
 
-**Source .bashrc:**
+Source .bashrc (or restart terminal session):
 
     . ~/.bashrc
 
