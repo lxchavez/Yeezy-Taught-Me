@@ -92,10 +92,10 @@ Install all dependencies using `sudo pip install -r requirements.txt`
 
 Download and uncompress the tar ball:
 
-- `wget http://static.echonest.com/millionsongsubset_full.tar.gz`
-- `mkdir assets`
-- `mkdir data`
-- `tar -xf millionsongsubset_full.tar.gz -C assets/data/`
+    wget http://static.echonest.com/millionsongsubset_full.tar.gz
+    mkdir assets
+    mkdir data
+    tar -xf millionsongsubset_full.tar.gz -C assets/data/
 
 ## Create datasets
 
