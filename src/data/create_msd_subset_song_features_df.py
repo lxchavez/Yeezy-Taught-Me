@@ -117,7 +117,28 @@ def main():
     logger.info('Making songs_features_df data set from raw data')
 
     # Grab terms for the artist ID set in the config file
-    target_artist_terms = get_target_artist_terms()
+    # No longer using all terms from the target_artist_terms:
+    #   target_artist_terms = get_target_artist_terms()
+    #
+    # as I was getting a lot of rock and pop that was not traditionally
+    # viewed as hip hop and rap; at least the set of songs I want
+    # to compare.
+    #
+    # Instead, I selected a handful of artist terms that are listed from
+    # the susbet of Kanye West songs I will like to compare with.
+    #
+    target_artist_terms = [
+        'alternative rap',
+        'beats',
+        'black',
+        'east coast rap',
+        'gangsta',
+        'hip hop',
+        'producer',
+        'rap',
+        'soul',
+        'urban'
+    ]
 
     # Grab terms for all the other artists
     all_artists_terms_df = get_all_artist_terms(target_artist_terms)
@@ -131,8 +152,8 @@ def main():
     song_features_df = pd.DataFrame(songs_with_features)
 
     # Get song lyrics
-    song_features_df['lyrics'] = song_features_df.apply(
-        lambda row: get_lyrics(row['artist_name'], row['title']), axis=1)
+    # song_features_df['lyrics'] = song_features_df.apply(
+    #     lambda row: get_lyrics(row['artist_name'], row['title']), axis=1)
 
     # Export our DataFrame
     export_dataset(song_features_df, 'msd_subset_song_features_df.pkl')
