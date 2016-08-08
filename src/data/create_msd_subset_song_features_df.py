@@ -129,15 +129,12 @@ def main():
     #
     target_artist_terms = [
         'alternative rap',
-        'beats',
         'black',
         'east coast rap',
         'gangsta',
         'hip hop',
-        'producer',
         'rap',
-        'soul',
-        'urban'
+        'soul'
     ]
 
     # Grab terms for all the other artists
