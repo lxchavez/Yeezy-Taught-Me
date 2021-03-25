@@ -97,7 +97,7 @@ python-dateutil==2.1
 python-dotenv==0.5.1
 pytz==2016.6.1
 pyxattr==0.5.0
-PyYAML==3.10
+PyYAML==5.4
 pyzmq==15.3.0
 qtconsole==4.2.1
 requests==1.2.3
